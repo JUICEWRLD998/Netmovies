@@ -2,8 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   return (
-    <View className="flex-1 bg-blue-500 items-center justify-center">
-  <Text className="text-white text-2xl font-bold">Hello NativeWind!</Text>
+    <View style={styles.container}>
+  <Text style={styles.title}>Hello Style prop!</Text>
 </View>
   );
 }
@@ -13,11 +13,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
   },
   title: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: "bold",
-    color: "#E50914",
+    color: "purple",
   },
 });
