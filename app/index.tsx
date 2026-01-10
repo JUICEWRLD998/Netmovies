@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hello World!</Text>
+      <Text style={styles.title}>First Mobile App</Text>
       
     </View>
   );
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   title: {
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#E50914",
   },
