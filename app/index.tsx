@@ -3,8 +3,9 @@ import { StyleSheet, Text, View } from "react-native";
 export default function Index() {
   return (
     <View style={styles.container}>
-  <Text style={styles.title}>Hello Style prop!</Text>
-</View>
+      <Text style={styles.title}>Hello World!</Text>
+      
+    </View>
   );
 }
 
@@ -13,10 +14,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#000",
   },
   title: {
-    fontSize: 40,
+    fontSize: 48,
     fontWeight: "bold",
-    color: "purple",
+    color: "#E50914",
   },
 });
