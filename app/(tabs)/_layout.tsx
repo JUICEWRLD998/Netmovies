@@ -11,6 +11,10 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#000",
           borderTopColor: "#333",
+          borderRadius: 24,
+          marginHorizontal: 16,
+          marginBottom: 8,
+          position: "absolute",
         },
         headerShown: false,
       }}
