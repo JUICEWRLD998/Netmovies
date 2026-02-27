@@ -2,5 +2,12 @@ import { Stack } from "expo-router"; // this imports the Stack component from th
 import "../global.css"; // this is the global styling
 
 export default function RootLayout() {
-  return <Stack />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: "#000" },
+      }}
+    />
+  );
 }

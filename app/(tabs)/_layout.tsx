@@ -12,10 +12,7 @@ export default function TabLayout() {
           backgroundColor: "#000",
           borderTopColor: "#333",
         },
-        headerStyle: {
-          backgroundColor: "#000",
-        },
-        headerTintColor: "#fff",
+        headerShown: false,
       }}
     >
       <Tabs.Screen
