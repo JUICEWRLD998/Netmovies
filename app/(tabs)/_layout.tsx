@@ -1,4 +1,4 @@
-//i imported Ionicons for the icons in the tab bar and Tabs from expo-router to create the tab navigation. The TabLayout component defines the structure of the tab navigation, including the styling for active and inactive tabs, as well as the header. Each tab screen is defined with a name, title, and an icon that changes color based on whether it is active or not.
+//Imported Ionicons for the icons in the tab bar and Tabs from expo-router to create the tab navigation. The TabLayout component defines the structure of the tab navigation, including the styling for active and inactive tabs, as well as the header. Each tab screen is defined with a name, title, and an icon that changes color based on whether it is active or not.
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
