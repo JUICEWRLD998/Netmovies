@@ -1,11 +1,5 @@
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router"; // this imports the redirect component from the expo-router
 
 export default function Index() {
-  return (
-    <View className="flex-1 justify-center items-center bg-black">
-      <Text className="text-5xl font-bold text-[#c4040e]">
-        First Mobile App
-      </Text>
-    </View>
-  );
+  return <Redirect href="/(tabs)/home" />; // this line redirects the user to the home page when they access the root URL of the app. The href prop specifies the path to redirect to, which in this case is "/(tabs)/home". This means that when the user opens the app, they will be automatically taken to the home page of the tab navigation.
 }
