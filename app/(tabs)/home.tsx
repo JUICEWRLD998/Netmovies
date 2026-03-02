@@ -1,9 +1,25 @@
-import { Text, View } from "react-native";
+import { Image, ScrollView, TextInput, View } from "react-native";
 
 export default function HomePage() {
   return (
-    <View className="flex-1 justify-center items-center bg-[#fff]">
-      <Text className="text-3xl font-bold text-black">Home Page</Text>
-    </View>
+    <ScrollView className="flex-1 bg-[#0F1528] px-6 pt-16">
+      {/* Brand Logo */}
+      <View className="items-center mb-8">
+        <Image
+          source={require("../../assets/images/brand-logo.png")}
+          className="w-32 h-32"
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* Search Bar */}
+      <View className="bg-[#1A1F3A] rounded-full mt-1 px-3 py-3 flex-row items-center">
+        <TextInput
+          placeholder="Search through 300+ movies online"
+          placeholderTextColor="#6B7280"
+          className="flex-1 text-white text-base"
+        />
+      </View>
+    </ScrollView>
   );
 }
