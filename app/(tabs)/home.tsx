@@ -20,6 +20,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
+  // Fetch movies from TMDB API
   const fetchMovies = async (query: string = "") => {
     try {
       setError(null);

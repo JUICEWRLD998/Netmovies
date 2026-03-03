@@ -14,6 +14,7 @@ export default function TabLayout() {
           borderRadius: 24,
           marginHorizontal: 16,
           marginBottom: 8,
+          opacity: 0.8,
           position: "absolute",
         },
         headerShown: false,
