@@ -26,11 +26,18 @@ export default function HomePage() {
       setError(null);
       setIsSearching(query.length > 0);
 
-      const data = query.trim()
-        ? await TMDB.searchMovies(query)
-        : await TMDB.discoverMovies();
-
-      setMovies(data.results);
+      if (query.trim()) {
+        const data = await TMDB.searchMovies(query);
+        setMovies(data.results.slice(0, 30));
+      } else {
+        // Fetch 2 pages for 30 movies
+        const [page1, page2] = await Promise.all([
+          TMDB.discoverMovies(1),
+          TMDB.discoverMovies(2),
+        ]);
+        const allMovies = [...page1.results, ...page2.results].slice(0, 30);
+        setMovies(allMovies);
+      }
     } catch (err: any) {
       setError(err.message || "Failed to fetch movies");
       console.error("Error fetching movies:", err);
@@ -80,7 +87,7 @@ export default function HomePage() {
 
     return (
       <TouchableOpacity className="w-[48%] mb-4">
-        <View className="bg-[#1A1F3A] rounded-lg overflow-hidden">
+        <View className="bg-[#1A1F3A] rounded-lg overflow-hidden h-80">
           {posterUrl ? (
             <Image
               source={{ uri: posterUrl }}
@@ -92,7 +99,7 @@ export default function HomePage() {
               <Ionicons name="film-outline" size={48} color="#6B7280" />
             </View>
           )}
-          <View className="p-3">
+          <View className="p-3 flex-1 justify-between">
             <Text
               className="text-white font-semibold text-sm"
               numberOfLines={2}
@@ -102,7 +109,7 @@ export default function HomePage() {
             <View className="flex-row items-center mt-2">
               <Ionicons name="star" size={14} color="#FFD700" />
               <Text className="text-gray-400 text-xs ml-1">
-                {item.vote_average.toFixed(1)}
+                {(item.vote_average / 2).toFixed(1)}
               </Text>
               <Text className="text-gray-500 text-xs ml-2">
                 {item.release_date.split("-")[0]}
