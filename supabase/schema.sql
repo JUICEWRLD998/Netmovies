@@ -68,3 +68,40 @@ $$;
 create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ── Search Tracking ──────────────────────────────────────────
+create table if not exists public.searches (
+  id          uuid primary key default gen_random_uuid(),
+  query       text not null,
+  count       integer not null default 1,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now(),
+  constraint searches_query_key unique (query)
+);
+
+alter table public.searches enable row level security;
+
+-- Anyone can read search counts (e.g. for trending searches)
+create policy "Anyone can view searches"
+  on public.searches for select using (true);
+
+-- Allow inserts for new queries
+create policy "Anyone can insert searches"
+  on public.searches for insert with check (true);
+
+-- Allow updating the count on existing queries
+create policy "Anyone can update search count"
+  on public.searches for update using (true);
+
+-- Upsert a search query: insert on first use, increment count on repeat
+create or replace function public.upsert_search(search_query text)
+returns void language plpgsql security definer as $$
+begin
+  insert into public.searches (query, count)
+  values (lower(trim(search_query)), 1)
+  on conflict (query)
+  do update set
+    count      = searches.count + 1,
+    updated_at = now();
+end;
+$$;

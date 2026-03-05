@@ -63,3 +63,21 @@ export const auth = {
  * Usage: db.from("bookmarks").select("*").eq("user_id", userId)
  */
 export const db = supabase;
+
+// ─── Search tracking ─────────────────────────────────────────────────────────
+
+/** Persist a search query to the database (upserts with count increment). */
+export const trackSearch = async (query: string): Promise<void> => {
+  const trimmed = query.trim();
+  if (!trimmed) return;
+  await supabase.rpc("upsert_search", { search_query: trimmed });
+};
+
+/** Fetch the most-searched queries, ordered by count descending. */
+export const getTrendingSearches = async (limit = 10) => {
+  return supabase
+    .from("searches")
+    .select("query, count")
+    .order("count", { ascending: false })
+    .limit(limit);
+};

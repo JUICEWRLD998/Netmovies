@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { trackSearch } from "../../services/supabase";
 import { TMDB } from "../../services/tmdb";
 import { Movie } from "../../types/movie";
 
@@ -48,6 +49,8 @@ export default function SearchPage() {
       setTotalPages(data.total_pages);
       setTotalResults(data.total_results);
       setMovies((prev) => (append ? [...prev, ...data.results] : data.results));
+      // Persist the search query on the first page (fire-and-forget)
+      if (!append && nextPage === 1) trackSearch(query);
     } catch (err: any) {
       setError(err.message || "Failed to search movies");
     } finally {
