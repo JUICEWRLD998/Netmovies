@@ -67,7 +67,7 @@ export default function HomePage() {
   useEffect(() => {
     fetchMovies();
     TMDB.getTrending()
-      .then((data) => setTrendingMovies(data.results.slice(0, 5)))
+      .then((data) => setTrendingMovies(data.results.slice(0, 10)))
       .catch(() => {});
   }, []);
 
@@ -76,7 +76,7 @@ export default function HomePage() {
     setSearchQuery("");
     fetchMovies();
     TMDB.getTrending()
-      .then((data) => setTrendingMovies(data.results.slice(0, 5)))
+      .then((data) => setTrendingMovies(data.results.slice(0, 10)))
       .catch(() => {});
   };
 
