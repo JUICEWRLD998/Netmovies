@@ -2,19 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useAuth, friendlyAuthError } from "../../context/AuthContext";
+import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -70,24 +69,20 @@ export default function LoginScreen() {
       );
       return;
     }
-    Alert.alert(
-      "Reset Password",
-      `Send a password reset link to ${trimmed}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Send",
-          onPress: async () => {
-            const { error } = await resetPassword(trimmed);
-            if (error) {
-              Alert.alert("Error", friendlyAuthError(error));
-            } else {
-              Alert.alert("Check your email", "A reset link has been sent.");
-            }
-          },
+    Alert.alert("Reset Password", `Send a password reset link to ${trimmed}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Send",
+        onPress: async () => {
+          const { error } = await resetPassword(trimmed);
+          if (error) {
+            Alert.alert("Error", friendlyAuthError(error));
+          } else {
+            Alert.alert("Check your email", "A reset link has been sent.");
+          }
         },
-      ],
-    );
+      },
+    ]);
   }, [email, resetPassword]);
 
   const isDisabled = loading;
@@ -241,7 +236,6 @@ export default function LoginScreen() {
                 </Text>
               )}
             </TouchableOpacity>
-
           </View>
 
           {/* ── Footer ──────────────────────────────────────────────────── */}

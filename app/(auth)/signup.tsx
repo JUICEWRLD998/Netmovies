@@ -2,18 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useAuth, friendlyAuthError } from "../../context/AuthContext";
+import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -88,7 +88,12 @@ export default function SignUpScreen() {
         Alert.alert(
           "Check your email",
           "We sent a confirmation link. Please verify your email to continue.",
-          [{ text: "OK", onPress: () => router.replace("/(auth)/login" as Href) }],
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/(auth)/login" as Href),
+            },
+          ],
         );
       }
     } catch {
@@ -224,7 +229,9 @@ export default function SignUpScreen() {
                     className="flex-row items-center mb-1.5"
                   >
                     <Ionicons
-                      name={rule.passed ? "checkmark-circle" : "ellipse-outline"}
+                      name={
+                        rule.passed ? "checkmark-circle" : "ellipse-outline"
+                      }
                       size={16}
                       color={rule.passed ? "#22C55E" : "#6B7280"}
                     />
@@ -285,9 +292,7 @@ export default function SignUpScreen() {
                         : "close-circle"
                     }
                     size={16}
-                    color={
-                      password === confirmPassword ? "#22C55E" : "#EF4444"
-                    }
+                    color={password === confirmPassword ? "#22C55E" : "#EF4444"}
                   />
                   <Text
                     className="ml-2 text-sm"
@@ -327,7 +332,6 @@ export default function SignUpScreen() {
                 </Text>
               )}
             </TouchableOpacity>
-
           </View>
 
           {/* ── Footer ──────────────────────────────────────────────────── */}

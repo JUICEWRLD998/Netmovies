@@ -1,14 +1,14 @@
 import {
-  Stack,
-  useRouter,
-  useSegments,
-  useRootNavigationState,
-  type Href,
+    Stack,
+    useRootNavigationState,
+    useRouter,
+    useSegments,
+    type Href,
 } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
-import "../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import "../global.css";
 
 /** Redirects users between (auth) and (tabs) based on session state. */
 function AuthGate({ children }: { children: React.ReactNode }) {
