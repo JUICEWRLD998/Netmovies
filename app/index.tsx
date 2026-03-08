@@ -1,5 +1,21 @@
-import { Redirect } from "expo-router"; // this imports the redirect component from the expo-router
+import { Redirect, type Href } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
+import { useAuth } from "../context/AuthContext";
 
 export default function Index() {
-  return <Redirect href="/(tabs)/home" />; // this line redirects the user to the home page when they access the root URL of the app. The href prop specifies the path to redirect to, which in this case is "/(tabs)/home". This means that when the user opens the app, they will be automatically taken to the home page of the tab navigation.
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-[#0F1528] items-center justify-center">
+        <ActivityIndicator size="large" color="#E50914" />
+      </View>
+    );
+  }
+
+  if (session) {
+    return <Redirect href="/(tabs)/home" />;
+  }
+
+  return <Redirect href={"/(auth)/welcome" as Href} />;
 }

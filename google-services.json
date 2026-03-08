@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "523192482970",
+    "project_id": "gethired-251cc",
+    "storage_bucket": "gethired-251cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523192482970:android:3af9216939be87b678b323",
+        "android_client_info": {
+          "package_name": "com.Netmovies"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "523192482970-urgu0vvte5rjv0fsnqknc3gs9iu5m6un.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC8JQkTIIoN-UkdP0I_EASL1uxXn1L4oM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523192482970-urgu0vvte5rjv0fsnqknc3gs9iu5m6un.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

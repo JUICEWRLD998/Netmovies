@@ -5,6 +5,9 @@ declare global {
       EXPO_PUBLIC_API_ACCESS_TOKEN: string;
       EXPO_PUBLIC_API_KEY: string;
 
+      // Google Sign-In (Web Client ID from Google Cloud Console / Firebase)
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: string;
+
       // Supabase (client-side – safe to expose)
       EXPO_PUBLIC_SUPABASE_URL: string;
       EXPO_PUBLIC_SUPABASE_ANON_KEY: string;

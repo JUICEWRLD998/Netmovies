@@ -1,13 +1,61 @@
-import { Stack } from "expo-router"; // this imports the Stack component from the expo-router library, which is used to create a stack-based navigation structure for the app. The Stack component allows you to define different screens and navigate between them in a way that mimics the behavior of a stack of pages, where you can push new screens onto the stack and pop them off to go back to previous screens.
-import "../global.css"; // this is the global styling
+import {
+  Stack,
+  useRouter,
+  useSegments,
+  useRootNavigationState,
+  type Href,
+} from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import "../global.css";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+
+/** Redirects users between (auth) and (tabs) based on session state. */
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+  const navigationState = useRootNavigationState();
+
+  useEffect(() => {
+    // Wait until the router is mounted and auth state is resolved
+    if (!navigationState?.key || loading) return;
+
+    const inAuthGroup = (segments[0] as string) === "(auth)";
+
+    if (!session && !inAuthGroup) {
+      router.replace("/(auth)/welcome" as Href);
+    } else if (session && inAuthGroup) {
+      router.replace("/(tabs)/home");
+    }
+  }, [session, loading, segments, navigationState?.key]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-[#0F1528] items-center justify-center">
+        <ActivityIndicator size="large" color="#E50914" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: "#000" },
-      }}
-    />
+    <AuthProvider>
+      <AuthGate>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#0F1528" },
+          }}
+        >
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="index" />
+        </Stack>
+      </AuthGate>
+    </AuthProvider>
   );
 }
