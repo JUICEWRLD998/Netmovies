@@ -55,6 +55,42 @@ export const TMDB = {
   },
 
   /**
+   * Fetch trending movies (week window)
+   * @returns Promise with the top 5 trending movies
+   */
+  getTrending: async (): Promise<TMDBResponse> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/trending/movie/week?language=en-US`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${API_ACCESS_TOKEN}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw {
+          message: errorData.status_message || "Failed to fetch trending",
+          status_code: response.status,
+        } as MovieError;
+      }
+
+      const data: TMDBResponse = await response.json();
+      return data;
+    } catch (error: any) {
+      if (error.message && error.status_code) throw error;
+      throw {
+        message: "Network error. Please check your connection.",
+        status_code: 0,
+      } as MovieError;
+    }
+  },
+
+  /**
    * Search for movies by query
    * @param query - Search query string
    * @param page - Page number for pagination

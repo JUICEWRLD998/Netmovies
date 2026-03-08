@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -14,6 +15,7 @@ import { Movie } from "../../types/movie";
 
 export default function HomePage() {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -64,12 +66,18 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchMovies();
+    TMDB.getTrending()
+      .then((data) => setTrendingMovies(data.results.slice(0, 5)))
+      .catch(() => {});
   }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
     setSearchQuery("");
     fetchMovies();
+    TMDB.getTrending()
+      .then((data) => setTrendingMovies(data.results.slice(0, 5)))
+      .catch(() => {});
   };
 
   const handleSearchChange = (text: string) => {
@@ -160,6 +168,72 @@ export default function HomePage() {
                 </TouchableOpacity>
               )}
             </View>
+
+            {/* Trending Row — hidden while searching */}
+            {!loading &&
+              !error &&
+              !isSearching &&
+              trendingMovies.length > 0 && (
+                <View className="mb-6">
+                  <View className="flex-row items-center justify-between mb-3">
+                    <Text className="text-white text-xl font-bold">
+                      Trending
+                    </Text>
+                    <Ionicons name="trending-up" size={22} color="#E50914" />
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 12 }}
+                  >
+                    {trendingMovies.map((item) => {
+                      const poster = TMDB.getImageUrl(item.poster_path, "w342");
+                      return (
+                        <TouchableOpacity key={item.id} activeOpacity={0.85}>
+                          <View className="w-36 rounded-xl overflow-hidden bg-[#1A1F3A]">
+                            {poster ? (
+                              <Image
+                                source={{ uri: poster }}
+                                style={{ width: 144, height: 210 }}
+                                resizeMode="cover"
+                              />
+                            ) : (
+                              <View
+                                style={{ width: 144, height: 210 }}
+                                className="bg-[#2A2F4A] justify-center items-center"
+                              >
+                                <Ionicons
+                                  name="film-outline"
+                                  size={36}
+                                  color="#6B7280"
+                                />
+                              </View>
+                            )}
+                            <View className="p-2">
+                              <Text
+                                className="text-white text-xs font-semibold"
+                                numberOfLines={1}
+                              >
+                                {item.title}
+                              </Text>
+                              <View className="flex-row items-center mt-1">
+                                <Ionicons
+                                  name="star"
+                                  size={11}
+                                  color="#FFD700"
+                                />
+                                <Text className="text-gray-400 text-xs ml-1">
+                                  {(item.vote_average / 2).toFixed(1)}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
 
             {/* Section Title */}
             {!loading && !error && (
