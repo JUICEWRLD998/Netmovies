@@ -6,7 +6,7 @@ import {
     type Href,
 } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator,StatusBar, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import "../global.css";
 
@@ -45,6 +45,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AuthGate>
+        <StatusBar hidden={true} />
         <Stack
           screenOptions={{
             headerShown: false,
