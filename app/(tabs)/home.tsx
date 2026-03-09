@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +15,7 @@ import { TMDB } from "../../services/tmdb";
 import { Movie } from "../../types/movie";
 
 export default function HomePage() {
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -94,7 +96,10 @@ export default function HomePage() {
     const posterUrl = TMDB.getImageUrl(item.poster_path, "w342");
 
     return (
-      <TouchableOpacity className="w-[48%] mb-4">
+      <TouchableOpacity
+        className="w-[48%] mb-4"
+        onPress={() => router.push(`/movie/${item.id}` as any)}
+      >
         <View className="bg-[#1A1F3A] rounded-lg overflow-hidden h-80">
           {posterUrl ? (
             <Image

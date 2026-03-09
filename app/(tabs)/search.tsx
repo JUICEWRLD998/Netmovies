@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,21 +16,22 @@ import { TMDB } from "../../services/tmdb";
 import { Movie } from "../../types/movie";
 
 const GENRES = [
-  { id: 28,    label: "Action" },
-  { id: 35,    label: "Comedy" },
-  { id: 27,    label: "Horror" },
+  { id: 28, label: "Action" },
+  { id: 35, label: "Comedy" },
+  { id: 27, label: "Horror" },
   { id: 10749, label: "Romance" },
-  { id: 878,   label: "Sci-Fi" },
-  { id: 53,    label: "Thriller" },
-  { id: 18,    label: "Drama" },
-  { id: 16,    label: "Animation" },
-  { id: 12,    label: "Adventure" },
-  { id: 80,    label: "Crime" },
-  { id: 14,    label: "Fantasy" },
+  { id: 878, label: "Sci-Fi" },
+  { id: 53, label: "Thriller" },
+  { id: 18, label: "Drama" },
+  { id: 16, label: "Animation" },
+  { id: 12, label: "Adventure" },
+  { id: 80, label: "Crime" },
+  { id: 14, label: "Fantasy" },
   { id: 10751, label: "Family" },
 ];
 
 export default function SearchPage() {
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -43,7 +45,11 @@ export default function SearchPage() {
   const inputRef = useRef<TextInput>(null);
 
   // Fetch by genre
-  const fetchByGenre = async (genreId: number, append = false, nextPage = 1) => {
+  const fetchByGenre = async (
+    genreId: number,
+    append = false,
+    nextPage = 1,
+  ) => {
     try {
       setError(null);
       const data = await TMDB.discoverByGenre(genreId, nextPage);
@@ -174,7 +180,10 @@ export default function SearchPage() {
     const posterUrl = TMDB.getImageUrl(item.poster_path, "w342");
 
     return (
-      <TouchableOpacity className="w-[48%] mb-4">
+      <TouchableOpacity
+        className="w-[48%] mb-4"
+        onPress={() => router.push(`/movie/${item.id}` as any)}
+      >
         <View className="bg-[#1A1F3A] rounded-lg overflow-hidden h-80">
           {posterUrl ? (
             <Image

@@ -1,12 +1,12 @@
 import {
-    Stack,
-    useRootNavigationState,
-    useRouter,
-    useSegments,
-    type Href,
+  Stack,
+  useRootNavigationState,
+  useRouter,
+  useSegments,
+  type Href,
 } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator,StatusBar, View } from "react-native";
+import { ActivityIndicator, StatusBar, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import "../global.css";
 
@@ -55,6 +55,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="index" />
+          <Stack.Screen name="movie/[id]" />
         </Stack>
       </AuthGate>
     </AuthProvider>

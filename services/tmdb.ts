@@ -1,4 +1,4 @@
-import { MovieError, TMDBResponse } from "../types/movie";
+import { MovieDetail, MovieError, TMDBResponse } from "../types/movie";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
@@ -168,6 +168,38 @@ export const TMDB = {
       if (error.message && error.status_code) {
         throw error;
       }
+      throw {
+        message: "Network error. Please check your connection.",
+        status_code: 0,
+      } as MovieError;
+    }
+  },
+
+  getMovieDetails: async (id: number): Promise<MovieDetail> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/movie/${id}?append_to_response=release_dates&language=en-US`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${API_ACCESS_TOKEN}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw {
+          message: errorData.status_message || "Failed to fetch movie details",
+          status_code: response.status,
+        } as MovieError;
+      }
+
+      const data: MovieDetail = await response.json();
+      return data;
+    } catch (error: any) {
+      if (error.message && error.status_code) throw error;
       throw {
         message: "Network error. Please check your connection.",
         status_code: 0,

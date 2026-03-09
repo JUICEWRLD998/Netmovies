@@ -15,6 +15,40 @@ export interface Movie {
   video: boolean;
 }
 
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface ProductionCompany {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  origin_country: string;
+}
+
+export interface ProductionCountry {
+  iso_3166_1: string;
+  name: string;
+}
+
+export interface MovieDetail extends Omit<Movie, "genre_ids"> {
+  runtime: number | null;
+  genres: Genre[];
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  budget: number;
+  revenue: number;
+  tagline: string | null;
+  status: string;
+  release_dates?: {
+    results: Array<{
+      iso_3166_1: string;
+      release_dates: Array<{ certification: string; type: number }>;
+    }>;
+  };
+}
+
 export interface TMDBResponse {
   page: number;
   results: Movie[];
