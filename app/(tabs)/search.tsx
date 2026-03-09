@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -12,6 +13,21 @@ import {
 import { trackSearch } from "../../services/supabase";
 import { TMDB } from "../../services/tmdb";
 import { Movie } from "../../types/movie";
+
+const GENRES = [
+  { id: 28,    label: "Action" },
+  { id: 35,    label: "Comedy" },
+  { id: 27,    label: "Horror" },
+  { id: 10749, label: "Romance" },
+  { id: 878,   label: "Sci-Fi" },
+  { id: 53,    label: "Thriller" },
+  { id: 18,    label: "Drama" },
+  { id: 16,    label: "Animation" },
+  { id: 12,    label: "Adventure" },
+  { id: 80,    label: "Crime" },
+  { id: 14,    label: "Fantasy" },
+  { id: 10751, label: "Family" },
+];
 
 export default function SearchPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -23,7 +39,24 @@ export default function SearchPage() {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalResults, setTotalResults] = useState<number>(0);
+  const [activeGenre, setActiveGenre] = useState<number | null>(null);
   const inputRef = useRef<TextInput>(null);
+
+  // Fetch by genre
+  const fetchByGenre = async (genreId: number, append = false, nextPage = 1) => {
+    try {
+      setError(null);
+      const data = await TMDB.discoverByGenre(genreId, nextPage);
+      setTotalPages(data.total_pages);
+      setTotalResults(data.total_results);
+      setMovies((prev) => (append ? [...prev, ...data.results] : data.results));
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch movies");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   // Fetch trending movies on initial load
   const fetchTrending = async (append = false, nextPage = 1) => {
@@ -69,17 +102,36 @@ export default function SearchPage() {
     const timer = setTimeout(() => {
       setPage(1);
       if (searchQuery.trim()) {
+        setActiveGenre(null);
         setLoading(true);
         setIsSearching(true);
         fetchSearch(searchQuery, false, 1);
       } else {
         setIsSearching(false);
         setLoading(true);
-        fetchTrending(false, 1);
+        if (activeGenre !== null) {
+          fetchByGenre(activeGenre, false, 1);
+        } else {
+          fetchTrending(false, 1);
+        }
       }
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const handleGenrePress = (genreId: number) => {
+    const next = activeGenre === genreId ? null : genreId;
+    setActiveGenre(next);
+    setPage(1);
+    setLoading(true);
+    setSearchQuery("");
+    setIsSearching(false);
+    if (next !== null) {
+      fetchByGenre(next, false, 1);
+    } else {
+      fetchTrending(false, 1);
+    }
+  };
 
   // Infinite scroll — load next page
   const loadMore = () => {
@@ -89,6 +141,8 @@ export default function SearchPage() {
     setLoadingMore(true);
     if (isSearching && searchQuery.trim()) {
       fetchSearch(searchQuery, true, nextPage);
+    } else if (activeGenre !== null) {
+      fetchByGenre(activeGenre, true, nextPage);
     } else {
       fetchTrending(true, nextPage);
     }
@@ -99,7 +153,11 @@ export default function SearchPage() {
     setIsSearching(false);
     setPage(1);
     setLoading(true);
-    fetchTrending(false, 1);
+    if (activeGenre !== null) {
+      fetchByGenre(activeGenre, false, 1);
+    } else {
+      fetchTrending(false, 1);
+    }
   };
 
   const retry = () => {
@@ -173,6 +231,41 @@ export default function SearchPage() {
         )}
       </View>
 
+      {/* Genre filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingBottom: 16 }}
+      >
+        {GENRES.map((g) => {
+          const active = activeGenre === g.id;
+          return (
+            <TouchableOpacity
+              key={g.id}
+              onPress={() => handleGenrePress(g.id)}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 20,
+                backgroundColor: active ? "#E50914" : "#1A1F3A",
+                borderWidth: 1,
+                borderColor: active ? "#E50914" : "#2A3050",
+              }}
+            >
+              <Text
+                style={{
+                  color: active ? "#FFFFFF" : "#9CA3AF",
+                  fontSize: 13,
+                  fontWeight: active ? "700" : "500",
+                }}
+              >
+                {g.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
       {/* Section title */}
       {!loading && !error && (
         <View className="flex-row items-center justify-between mb-4">
@@ -183,6 +276,15 @@ export default function SearchPage() {
               </Text>
               <Text className="text-gray-400 text-sm ml-2">
                 {totalResults.toLocaleString()}
+              </Text>
+            </>
+          ) : activeGenre !== null ? (
+            <>
+              <Text className="text-white text-xl font-bold">
+                {GENRES.find((g) => g.id === activeGenre)?.label}
+              </Text>
+              <Text className="text-gray-400 text-sm">
+                {totalResults.toLocaleString()} films
               </Text>
             </>
           ) : (

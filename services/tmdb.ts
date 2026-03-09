@@ -91,6 +91,47 @@ export const TMDB = {
   },
 
   /**
+   * Discover movies filtered by genre
+   * @param genreId - TMDB genre ID
+   * @param page - Page number for pagination
+   * @returns Promise with movie data or throws error
+   */
+  discoverByGenre: async (
+    genreId: number,
+    page: number = 1,
+  ): Promise<TMDBResponse> => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/discover/movie?page=${page}&with_genres=${genreId}&sort_by=popularity.desc&include_adult=false&language=en-US`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${API_ACCESS_TOKEN}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw {
+          message: errorData.status_message || "Failed to fetch movies",
+          status_code: response.status,
+        } as MovieError;
+      }
+
+      const data: TMDBResponse = await response.json();
+      return data;
+    } catch (error: any) {
+      if (error.message && error.status_code) throw error;
+      throw {
+        message: "Network error. Please check your connection.",
+        status_code: 0,
+      } as MovieError;
+    }
+  },
+
+  /**
    * Search for movies by query
    * @param query - Search query string
    * @param page - Page number for pagination
