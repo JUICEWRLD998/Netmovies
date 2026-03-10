@@ -13,12 +13,6 @@ import {
 } from "react-native";
 import { TMDB } from "../../services/tmdb";
 import { MovieDetail } from "../../types/movie";
-import { useAuth } from "../../context/AuthContext";
-import {
-  addBookmark,
-  isBookmarked,
-  removeBookmark,
-} from "../../services/supabase";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BACKDROP_HEIGHT = SCREEN_WIDTH * 0.65;
@@ -50,12 +44,9 @@ function getCertification(movie: MovieDetail): string {
 export default function MovieDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuth();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -64,41 +55,6 @@ export default function MovieDetailScreen() {
       .catch((err) => setError(err.message || "Failed to load"))
       .finally(() => setLoading(false));
   }, [id]);
-
-  useEffect(() => {
-    if (!user || !movie) return;
-    isBookmarked(user.id, movie.id)
-      .then(setBookmarked)
-      .catch(() => {});
-  }, [user, movie]);
-
-  const handleBookmarkToggle = async () => {
-    if (!user) {
-      router.push("/(auth)/login" as any);
-      return;
-    }
-    if (!movie || bookmarkLoading) return;
-    setBookmarkLoading(true);
-    try {
-      if (bookmarked) {
-        await removeBookmark(user.id, movie.id);
-        setBookmarked(false);
-      } else {
-        await addBookmark(user.id, {
-          id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          vote_average: movie.vote_average,
-          release_date: movie.release_date ?? "",
-        });
-        setBookmarked(true);
-      }
-    } catch {
-      // silently ignore
-    } finally {
-      setBookmarkLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -208,28 +164,6 @@ export default function MovieDetailScreen() {
           }}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-        {/* Bookmark button */}
-        <TouchableOpacity
-          onPress={handleBookmarkToggle}
-          style={{
-            position: "absolute",
-            top: 52,
-            right: 16,
-            backgroundColor: "rgba(0,0,0,0.55)",
-            borderRadius: 20,
-            padding: 8,
-          }}
-        >
-          {bookmarkLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons
-              name={bookmarked ? "bookmark" : "bookmark-outline"}
-              size={22}
-              color={bookmarked ? "#E50914" : "#fff"}
-            />
-          )}
         </TouchableOpacity>
       </View>
 
