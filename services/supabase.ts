@@ -64,6 +64,50 @@ export const auth = {
  */
 export const db = supabase;
 
+// ─── Storage helpers ─────────────────────────────────────────────────────────
+
+export const AVATAR_BUCKET = "avatars";
+
+export const getAvatarPublicUrl = (filePath: string) =>
+  supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath).data.publicUrl;
+
+export const uploadAvatarFile = async ({
+  userId,
+  fileUri,
+  contentType,
+}: {
+  userId: string;
+  fileUri: string;
+  contentType?: string | null;
+}) => {
+  const filePath = `${userId}/avatar`;
+  const response = await fetch(fileUri);
+
+  if (!response.ok) {
+    throw new Error("Unable to read the selected image.");
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const { error } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(filePath, arrayBuffer, {
+      contentType: contentType ?? "image/jpeg",
+      upsert: true,
+    });
+
+  if (error) throw error;
+
+  return getAvatarPublicUrl(filePath);
+};
+
+export const removeAvatarFile = async (userId: string) => {
+  const { error } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .remove([`${userId}/avatar`]);
+
+  if (error) throw error;
+};
+
 // ─── Search tracking ─────────────────────────────────────────────────────────
 
 /** Persist a search query to the database (upserts with count increment). */

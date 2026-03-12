@@ -14,7 +14,7 @@ type AuthContextType = {
     email: string,
     password: string,
   ) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 };
 
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) console.error("Sign-out error:", error.message);
+    return { error };
   };
 
   // ── Password Reset ───────────────────────────────────────────────────────
