@@ -22,6 +22,10 @@ create unique index if not exists bookmarks_user_movie_idx
 -- ── Row-Level Security ───────────────────────────────────────
 alter table public.bookmarks enable row level security;
 
+drop policy if exists "Users can view own bookmarks" on public.bookmarks;
+drop policy if exists "Users can insert own bookmarks" on public.bookmarks;
+drop policy if exists "Users can delete own bookmarks" on public.bookmarks;
+
 -- Authenticated users can only read their own bookmarks
 create policy "Users can view own bookmarks"
   on public.bookmarks for select
@@ -47,6 +51,10 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Profiles are viewable by everyone" on public.profiles;
+drop policy if exists "Users can insert own profile" on public.profiles;
+drop policy if exists "Users can update own profile" on public.profiles;
+
 create policy "Profiles are viewable by everyone"
   on public.profiles for select using (true);
 
@@ -69,7 +77,9 @@ begin
 end;
 $$;
 
-create or replace trigger on_auth_user_created
+drop trigger if exists on_auth_user_created on auth.users;
+
+create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
@@ -77,6 +87,11 @@ create or replace trigger on_auth_user_created
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do nothing;
+
+drop policy if exists "Avatar images are viewable by everyone" on storage.objects;
+drop policy if exists "Users can upload own avatar images" on storage.objects;
+drop policy if exists "Users can update own avatar images" on storage.objects;
+drop policy if exists "Users can delete own avatar images" on storage.objects;
 
 create policy "Avatar images are viewable by everyone"
   on storage.objects for select
@@ -114,6 +129,10 @@ create table if not exists public.searches (
 );
 
 alter table public.searches enable row level security;
+
+drop policy if exists "Anyone can view searches" on public.searches;
+drop policy if exists "Anyone can insert searches" on public.searches;
+drop policy if exists "Anyone can update search count" on public.searches;
 
 -- Anyone can read search counts (e.g. for trending searches)
 create policy "Anyone can view searches"

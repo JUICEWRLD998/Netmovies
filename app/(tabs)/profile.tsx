@@ -40,13 +40,30 @@ function friendlyProfileError(error: unknown): string {
   }
 
   const message = String(error.message ?? "");
+  const lowerMessage = message.toLowerCase();
 
-  if (message.includes("duplicate key value") && message.includes("username")) {
+  if (
+    lowerMessage.includes("duplicate key value") &&
+    lowerMessage.includes("username")
+  ) {
     return "That username is already taken. Try another one.";
   }
 
   if (
-    message.includes("JSON object requested, multiple (or no) rows returned")
+    lowerMessage.includes("schema cache") &&
+    lowerMessage.includes("public.profiles")
+  ) {
+    return "Profiles table is missing in Supabase. Run supabase/schema.sql in SQL Editor for the same project.";
+  }
+
+  if (lowerMessage.includes('relation "public.profiles" does not exist')) {
+    return "Profiles table is missing in Supabase. Run supabase/schema.sql in SQL Editor for the same project.";
+  }
+
+  if (
+    lowerMessage.includes(
+      "json object requested, multiple (or no) rows returned",
+    )
   ) {
     return "Your profile record is missing. Run the latest Supabase schema and try again.";
   }
@@ -83,6 +100,25 @@ export default function ProfilePage() {
   const memberSince = formatMemberSince(user?.created_at);
   const isBusy = savingProfile || updatingAvatar || signingOut;
 
+  const createMissingProfile = useCallback(async (): Promise<ProfileRecord> => {
+    if (!user?.id) return EMPTY_PROFILE;
+
+    const { data, error } = await db
+      .from("profiles")
+      .upsert(
+        {
+          id: user.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      )
+      .select("username, avatar_url, updated_at")
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ?? EMPTY_PROFILE;
+  }, [user?.id]);
+
   const loadProfile = useCallback(async () => {
     if (!user?.id) {
       setProfile(EMPTY_PROFILE);
@@ -103,7 +139,14 @@ export default function ProfilePage() {
 
       if (error) throw error;
 
-      const nextProfile = data ?? EMPTY_PROFILE;
+      if (!data) {
+        const createdProfile = await createMissingProfile();
+        setProfile(createdProfile);
+        setDraftUsername(createdProfile.username ?? "");
+        return;
+      }
+
+      const nextProfile = data;
       setProfile(nextProfile);
       setDraftUsername(nextProfile.username ?? "");
     } catch (error) {
@@ -113,7 +156,7 @@ export default function ProfilePage() {
     } finally {
       setLoadingProfile(false);
     }
-  }, [user?.id]);
+  }, [createMissingProfile, user?.id]);
 
   useEffect(() => {
     loadProfile();
@@ -164,11 +207,14 @@ export default function ProfilePage() {
 
       const { data, error } = await db
         .from("profiles")
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id)
+        .upsert(
+          {
+            id: user.id,
+            ...updates,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" },
+        )
         .select("username, avatar_url, updated_at")
         .maybeSingle();
 
