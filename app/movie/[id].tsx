@@ -3,14 +3,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { useAuth } from "../../context/AuthContext";
+import {
+  addMovieBookmark,
+  isMovieBookmarked,
+  removeMovieBookmark,
+} from "../../services/supabase";
 import { TMDB } from "../../services/tmdb";
 import { MovieDetail } from "../../types/movie";
 
@@ -41,12 +47,44 @@ function getCertification(movie: MovieDetail): string {
   return cert || "NR";
 }
 
+function friendlyBookmarkError(error: unknown): string {
+  if (typeof error !== "object" || error === null || !("message" in error)) {
+    return "Could not update bookmark. Please try again.";
+  }
+
+  const message = String(error.message ?? "");
+  const lowerMessage = message.toLowerCase();
+
+  if (lowerMessage.includes("signed in to manage bookmarks")) {
+    return "Sign in to bookmark this movie.";
+  }
+
+  if (lowerMessage.includes("already in your bookmarks")) {
+    return "This movie is already in your bookmarks.";
+  }
+
+  if (lowerMessage.includes("row-level security policy")) {
+    return "Bookmark action was blocked by security policy. Sign in again and retry.";
+  }
+
+  if (lowerMessage.includes('relation "public.bookmarks" does not exist')) {
+    return "Bookmarks table is missing in Supabase. Run supabase/schema.sql in SQL Editor for the same project.";
+  }
+
+  return message || "Could not update bookmark. Please try again.";
+}
+
 export default function MovieDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuth();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(true);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
+  const [bookmarkMessage, setBookmarkMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -55,6 +93,75 @@ export default function MovieDetailScreen() {
       .catch((err) => setError(err.message || "Failed to load"))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    const movieId = Number(id);
+    if (!id || Number.isNaN(movieId)) {
+      setBookmarked(false);
+      setBookmarkLoading(false);
+      return;
+    }
+
+    if (!user?.id) {
+      setBookmarked(false);
+      setBookmarkLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setBookmarkLoading(true);
+
+    isMovieBookmarked(user.id, movieId)
+      .then((isSaved) => {
+        if (!isMounted) return;
+        setBookmarked(isSaved);
+      })
+      .catch((bookmarkError) => {
+        if (!isMounted) return;
+        setBookmarkMessage(friendlyBookmarkError(bookmarkError));
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setBookmarkLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, user?.id]);
+
+  const handleToggleBookmark = async () => {
+    if (!movie) return;
+
+    setBookmarkMessage(null);
+    if (!user?.id) {
+      setBookmarkMessage("Sign in to bookmark this movie.");
+      return;
+    }
+
+    setBookmarkBusy(true);
+    try {
+      if (bookmarked) {
+        await removeMovieBookmark(user.id, movie.id);
+        setBookmarked(false);
+        setBookmarkMessage("Removed from your bookmarks.");
+      } else {
+        await addMovieBookmark(user.id, {
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          vote_average: movie.vote_average,
+          release_date: movie.release_date,
+        });
+        setBookmarked(true);
+        setBookmarkMessage("Added to your bookmarks.");
+      }
+    } catch (bookmarkError) {
+      setBookmarkMessage(friendlyBookmarkError(bookmarkError));
+    } finally {
+      setBookmarkBusy(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -116,6 +223,9 @@ export default function MovieDetailScreen() {
   const certification = getCertification(movie);
   const countries =
     movie.production_countries?.map((c) => c.name).join(" • ") || "N/A";
+  const isBookmarkSuccess =
+    (bookmarkMessage?.toLowerCase().includes("added") ?? false) ||
+    (bookmarkMessage?.toLowerCase().includes("removed") ?? false);
 
   return (
     <ScrollView
@@ -253,6 +363,58 @@ export default function MovieDetailScreen() {
               <Text style={{ color: "#6B7280", fontSize: 12 }}>
                 /10 ({movie.vote_count.toLocaleString()})
               </Text>
+            </View>
+
+            <View style={{ marginTop: 14 }}>
+              <TouchableOpacity
+                onPress={handleToggleBookmark}
+                disabled={bookmarkBusy || bookmarkLoading}
+                style={{
+                  backgroundColor: bookmarked ? "#E50914" : "#1F2937",
+                  borderRadius: 12,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: bookmarkBusy || bookmarkLoading ? 0.7 : 1,
+                }}
+              >
+                {bookmarkBusy || bookmarkLoading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Ionicons
+                    name={bookmarked ? "bookmark" : "bookmark-outline"}
+                    size={16}
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                <Text
+                  style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+                >
+                  {bookmarked ? "Remove Bookmark" : "Add to Bookmark"}
+                </Text>
+              </TouchableOpacity>
+
+              {!user?.id && (
+                <Text style={{ color: "#9CA3AF", fontSize: 12, marginTop: 8 }}>
+                  Sign in to save this movie to your bookmarks.
+                </Text>
+              )}
+
+              {!!bookmarkMessage && (
+                <Text
+                  style={{
+                    color: isBookmarkSuccess ? "#86EFAC" : "#FCA5A5",
+                    fontSize: 12,
+                    marginTop: 8,
+                    lineHeight: 18,
+                  }}
+                >
+                  {bookmarkMessage}
+                </Text>
+              )}
             </View>
           </View>
         </View>

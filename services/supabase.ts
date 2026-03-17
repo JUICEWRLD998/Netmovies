@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { AppState } from "react-native";
+import type { Bookmark, Movie } from "../types/movie";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -63,6 +64,102 @@ export const auth = {
  * Usage: db.from("bookmarks").select("*").eq("user_id", userId)
  */
 export const db = supabase;
+
+type BookmarkMovieInput = Pick<
+  Movie,
+  "id" | "title" | "poster_path" | "vote_average" | "release_date"
+>;
+
+const BOOKMARK_SELECT_FIELDS =
+  "id, user_id, movie_id, title, poster_path, vote_average, release_date, created_at";
+const bookmarkSignInMessage = "You need to be signed in to manage bookmarks.";
+const bookmarkAlreadySavedMessage = "This movie is already in your bookmarks.";
+
+const ensureBookmarkUserId = (userId: string) => {
+  const normalizedUserId = userId.trim();
+  if (!normalizedUserId) {
+    throw new Error(bookmarkSignInMessage);
+  }
+
+  return normalizedUserId;
+};
+
+const isBookmarkDuplicateError = (error: { code?: string; message?: string }) =>
+  error.code === "23505" ||
+  (error.message ?? "").toLowerCase().includes("bookmarks_user_movie_idx") ||
+  (error.message ?? "").toLowerCase().includes("duplicate key value");
+
+export const listUserBookmarks = async (
+  userId: string,
+): Promise<Bookmark[]> => {
+  const normalizedUserId = ensureBookmarkUserId(userId);
+  const { data, error } = await db
+    .from("bookmarks")
+    .select(BOOKMARK_SELECT_FIELDS)
+    .eq("user_id", normalizedUserId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Bookmark[];
+};
+
+export const addMovieBookmark = async (
+  userId: string,
+  movie: BookmarkMovieInput,
+): Promise<Bookmark> => {
+  const normalizedUserId = ensureBookmarkUserId(userId);
+  const { data, error } = await db
+    .from("bookmarks")
+    .insert({
+      user_id: normalizedUserId,
+      movie_id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      vote_average: movie.vote_average,
+      release_date: movie.release_date,
+    })
+    .select(BOOKMARK_SELECT_FIELDS)
+    .single();
+
+  if (error) {
+    if (isBookmarkDuplicateError(error)) {
+      throw new Error(bookmarkAlreadySavedMessage);
+    }
+    throw error;
+  }
+
+  return data as Bookmark;
+};
+
+export const removeMovieBookmark = async (
+  userId: string,
+  movieId: number,
+): Promise<void> => {
+  const normalizedUserId = ensureBookmarkUserId(userId);
+  const { error } = await db
+    .from("bookmarks")
+    .delete()
+    .eq("user_id", normalizedUserId)
+    .eq("movie_id", movieId);
+
+  if (error) throw error;
+};
+
+export const isMovieBookmarked = async (
+  userId: string,
+  movieId: number,
+): Promise<boolean> => {
+  const normalizedUserId = ensureBookmarkUserId(userId);
+  const { data, error } = await db
+    .from("bookmarks")
+    .select("id")
+    .eq("user_id", normalizedUserId)
+    .eq("movie_id", movieId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return Boolean(data?.id);
+};
 
 // ─── Storage helpers ─────────────────────────────────────────────────────────
 

@@ -49,6 +49,17 @@ export interface MovieDetail extends Omit<Movie, "genre_ids"> {
   };
 }
 
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  movie_id: number;
+  title: string;
+  poster_path: string | null;
+  vote_average: number | null;
+  release_date: string | null;
+  created_at: string;
+}
+
 export interface TMDBResponse {
   page: number;
   results: Movie[];
