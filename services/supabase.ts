@@ -68,34 +68,162 @@ export const db = supabase;
 
 export const AVATAR_BUCKET = "avatars";
 
-export const getAvatarPublicUrl = (filePath: string) =>
-  supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath).data.publicUrl;
+const IMAGE_CONTENT_TYPES: Record<string, string> = {
+  gif: "image/gif",
+  heic: "image/heic",
+  heif: "image/heif",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
 
-export const uploadAvatarFile = async ({
-  userId,
+const getFileExtension = (path: string) => {
+  const [pathWithoutQuery] = path.split("?");
+  const extensionStart = pathWithoutQuery.lastIndexOf(".");
+
+  if (extensionStart === -1) return "";
+  return pathWithoutQuery.slice(extensionStart + 1).toLowerCase();
+};
+
+const resolveAvatarContentType = ({
+  contentType,
+  fileName,
   fileUri,
+}: {
+  contentType?: string | null;
+  fileName?: string | null;
+  fileUri: string;
+}) => {
+  if (contentType && contentType.trim() !== "") {
+    return contentType;
+  }
+
+  const fileNameExtension = fileName ? getFileExtension(fileName) : "";
+  if (fileNameExtension && IMAGE_CONTENT_TYPES[fileNameExtension]) {
+    return IMAGE_CONTENT_TYPES[fileNameExtension];
+  }
+
+  const uriExtension = getFileExtension(fileUri);
+  return IMAGE_CONTENT_TYPES[uriExtension] ?? "image/jpeg";
+};
+
+const readArrayBufferFromBase64 = async ({
+  base64,
   contentType,
 }: {
-  userId: string;
-  fileUri: string;
-  contentType?: string | null;
+  base64: string;
+  contentType: string;
 }) => {
-  const filePath = `${userId}/avatar`;
+  const dataUrl = `data:${contentType};base64,${base64}`;
+  const response = await fetch(dataUrl);
+
+  if (!response.ok) {
+    throw new Error("Unable to read the selected image.");
+  }
+
+  return response.arrayBuffer();
+};
+
+const readArrayBufferFromUri = async (fileUri: string) => {
   const response = await fetch(fileUri);
 
   if (!response.ok) {
     throw new Error("Unable to read the selected image.");
   }
 
-  const arrayBuffer = await response.arrayBuffer();
+  return response.arrayBuffer();
+};
+
+export const getAvatarPublicUrl = (filePath: string) =>
+  supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath).data.publicUrl;
+
+export const uploadAvatarFile = async ({
+  userId,
+  fileUri,
+  fileName,
+  fileBase64,
+  contentType,
+}: {
+  userId: string;
+  fileUri: string;
+  fileName?: string | null;
+  fileBase64?: string | null;
+  contentType?: string | null;
+}) => {
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+
+  if (!sessionData.session) {
+    throw new Error("You need to be signed in to update your avatar.");
+  }
+
+  const sessionUserId = sessionData.session.user.id;
+
+  const filePath = `${userId}/avatar`;
+  const resolvedContentType = resolveAvatarContentType({
+    contentType,
+    fileName,
+    fileUri,
+  });
+
+  if (__DEV__) {
+    const uriScheme = fileUri.includes(":") ? fileUri.split(":")[0] : "unknown";
+    console.log("[avatar-upload] Starting upload", {
+      hasBase64: Boolean(fileBase64),
+      resolvedContentType,
+      uriScheme,
+    });
+  }
+
+  let arrayBuffer: ArrayBuffer | null = null;
+
+  if (fileBase64) {
+    try {
+      arrayBuffer = await readArrayBufferFromBase64({
+        base64: fileBase64,
+        contentType: resolvedContentType,
+      });
+    } catch (error) {
+      if (__DEV__) {
+        console.warn("[avatar-upload] Base64 conversion failed, falling back to URI read", error);
+      }
+    }
+  }
+
+  if (!arrayBuffer) {
+    try {
+      arrayBuffer = await readArrayBufferFromUri(fileUri);
+    } catch (error) {
+      if (__DEV__) {
+        console.warn("[avatar-upload] URI read failed", {
+          fileUri,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+      throw new Error("Unable to read the selected image.");
+    }
+  }
+
   const { error } = await supabase.storage
     .from(AVATAR_BUCKET)
     .upload(filePath, arrayBuffer, {
-      contentType: contentType ?? "image/jpeg",
+      contentType: resolvedContentType,
       upsert: true,
     });
 
-  if (error) throw error;
+  if (error) {
+    if (__DEV__) {
+      console.warn("[avatar-upload] Supabase storage upload failed", {
+        filePath,
+        message: error.message,
+        sessionUserId,
+        uploadUserId: userId,
+      });
+    }
+    throw error;
+  }
 
   return getAvatarPublicUrl(filePath);
 };

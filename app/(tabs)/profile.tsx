@@ -60,6 +60,18 @@ function friendlyProfileError(error: unknown): string {
     return "Profiles table is missing in Supabase. Run supabase/schema.sql in SQL Editor for the same project.";
   }
 
+  if (lowerMessage.includes("unable to read the selected image")) {
+    if (Platform.OS === "android") {
+      return "We couldn't read that image on Android. Try picking a different photo and upload again.";
+    }
+
+    return "Unable to read the selected image. Please try another photo.";
+  }
+
+  if (lowerMessage.includes("row-level security policy")) {
+    return "Avatar upload is blocked by Supabase storage policy. Sign out and sign in again, then verify avatar policies in Supabase SQL Editor.";
+  }
+
   if (
     lowerMessage.includes(
       "json object requested, multiple (or no) rows returned",
@@ -273,14 +285,28 @@ export default function ProfilePage() {
         mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
+        base64: true,
         quality: 0.8,
       });
 
       if (result.canceled || !result.assets[0]) return;
 
       const asset = result.assets[0];
+
+      if (__DEV__) {
+        console.log("[avatar-picker] Selected image", {
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+          hasBase64: Boolean(asset.base64),
+          mimeType: asset.mimeType,
+          uri: asset.uri,
+        });
+      }
+
       const avatarUrl = await uploadAvatarFile({
         userId: user.id,
+        fileBase64: asset.base64,
+        fileName: asset.fileName,
         fileUri: asset.uri,
         contentType: asset.mimeType,
       });
