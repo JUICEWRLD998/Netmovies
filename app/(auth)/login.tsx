@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
@@ -110,19 +110,7 @@ export default function LoginScreen() {
           </View>
 
           <View className="px-8 pt-8 pb-4">
-            <Text
-              style={{
-                fontSize: 28,
-                fontWeight: "900",
-                color: "#E50914",
-                letterSpacing: 3,
-              }}
-            >
-              NETMOVIES
-            </Text>
-            <Text className="text-white text-2xl font-bold mt-6">
-              Welcome Back
-            </Text>
+            <Text className="text-white text-2xl font-bold">Welcome Back</Text>
             <Text className="text-gray-400 text-base mt-1">
               Sign in to continue
             </Text>

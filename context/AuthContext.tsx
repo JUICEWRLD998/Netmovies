@@ -22,6 +22,14 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const useAuth = () => useContext(AuthContext);
 
+const getWebAuthRedirectUrl = () => {
+  if (typeof window === "undefined" || !window.location?.origin) {
+    return undefined;
+  }
+
+  return `${window.location.origin}/login`;
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Map Supabase auth errors to user-friendly messages. */
@@ -78,9 +86,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
+    const emailRedirectTo = getWebAuthRedirectUrl();
     const { error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
+      options: emailRedirectTo
+        ? {
+            emailRedirectTo,
+          }
+        : undefined,
     });
     return { error };
   };
@@ -94,8 +108,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ── Password Reset ───────────────────────────────────────────────────────
 
   const resetPassword = async (email: string) => {
+    const redirectTo = getWebAuthRedirectUrl();
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
+      redirectTo
+        ? {
+            redirectTo,
+          }
+        : undefined,
     );
     return { error };
   };

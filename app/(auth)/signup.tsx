@@ -128,17 +128,7 @@ export default function SignUpScreen() {
           </View>
 
           <View className="px-8 pt-8 pb-4">
-            <Text
-              style={{
-                fontSize: 28,
-                fontWeight: "900",
-                color: "#E50914",
-                letterSpacing: 3,
-              }}
-            >
-              NETMOVIES
-            </Text>
-            <Text className="text-white text-2xl font-bold mt-6">
+            <Text className="text-white text-2xl font-bold">
               Create Account
             </Text>
             <Text className="text-gray-400 text-base mt-1">
