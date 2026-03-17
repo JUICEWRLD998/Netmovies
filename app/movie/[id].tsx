@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Linking,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -22,6 +23,7 @@ import { MovieDetail } from "../../types/movie";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BACKDROP_HEIGHT = SCREEN_WIDTH * 0.65;
+const DOWNLOAD_LINK_URL = "https://t4tsa.cc/";
 
 function formatMoney(n: number): string {
   if (!n) return "N/A";
@@ -158,6 +160,16 @@ export default function MovieDetailScreen() {
       setBookmarkMessage(friendlyBookmarkError(bookmarkError));
     } finally {
       setBookmarkBusy(false);
+    }
+  };
+
+  const handleOpenDownloadLink = async () => {
+    setBookmarkMessage(null);
+
+    try {
+      await Linking.openURL(DOWNLOAD_LINK_URL);
+    } catch {
+      setBookmarkMessage("Unable to open the download link right now.");
     }
   };
 
@@ -399,7 +411,9 @@ export default function MovieDetailScreen() {
                   </Text>
                 </TouchableOpacity>
 
-                <View
+                <TouchableOpacity
+                  onPress={handleOpenDownloadLink}
+                  activeOpacity={0.85}
                   style={{
                     marginLeft: 10,
                     width: 44,
@@ -413,7 +427,7 @@ export default function MovieDetailScreen() {
                   }}
                 >
                   <Ionicons name="download-outline" size={18} color="#E5E7EB" />
-                </View>
+                </TouchableOpacity>
               </View>
 
               {!user?.id && (
