@@ -16,6 +16,8 @@ import {
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 import {
   db,
+  MAX_AVATAR_UPLOAD_BYTES,
+  MAX_AVATAR_UPLOAD_MB,
   removeAvatarFile,
   uploadAvatarFile,
 } from "../../services/supabase";
@@ -33,6 +35,7 @@ const EMPTY_PROFILE: ProfileRecord = {
 };
 
 const USERNAME_RE = /^[A-Za-z0-9_]+$/;
+const AVATAR_TOO_LARGE_MESSAGE = `That image is too large. Please choose one smaller than ${MAX_AVATAR_UPLOAD_MB} MB.`;
 
 function friendlyProfileError(error: unknown): string {
   if (typeof error !== "object" || error === null || !("message" in error)) {
@@ -66,6 +69,18 @@ function friendlyProfileError(error: unknown): string {
     }
 
     return "Unable to read the selected image. Please try another photo.";
+  }
+
+  if (
+    lowerMessage.includes("avatar image is too large") ||
+    lowerMessage.includes("payload too large") ||
+    lowerMessage.includes("entity too large") ||
+    lowerMessage.includes("request body too large") ||
+    lowerMessage.includes("content too large") ||
+    lowerMessage.includes("file too large") ||
+    lowerMessage.includes("size limit")
+  ) {
+    return AVATAR_TOO_LARGE_MESSAGE;
   }
 
   if (lowerMessage.includes("row-level security policy")) {
@@ -293,6 +308,14 @@ export default function ProfilePage() {
 
       const asset = result.assets[0];
 
+      if (
+        typeof asset.fileSize === "number" &&
+        asset.fileSize > MAX_AVATAR_UPLOAD_BYTES
+      ) {
+        setErrorMsg(AVATAR_TOO_LARGE_MESSAGE);
+        return;
+      }
+
       if (__DEV__) {
         console.log("[avatar-picker] Selected image", {
           fileName: asset.fileName,
@@ -307,6 +330,7 @@ export default function ProfilePage() {
         userId: user.id,
         fileBase64: asset.base64,
         fileName: asset.fileName,
+        fileSize: asset.fileSize,
         fileUri: asset.uri,
         contentType: asset.mimeType,
       });

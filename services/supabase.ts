@@ -67,6 +67,51 @@ export const db = supabase;
 // ─── Storage helpers ─────────────────────────────────────────────────────────
 
 export const AVATAR_BUCKET = "avatars";
+export const MAX_AVATAR_UPLOAD_BYTES = 5 * 1024 * 1024;
+export const MAX_AVATAR_UPLOAD_MB = 5;
+
+const avatarSizeLimitMessage = `Avatar image is too large. Please choose an image smaller than ${MAX_AVATAR_UPLOAD_MB} MB.`;
+
+const getBase64ByteSize = (base64: string) => {
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+  return Math.floor((base64.length * 3) / 4) - padding;
+};
+
+const getResolvedAvatarSize = ({
+  fileSize,
+  fileBase64,
+}: {
+  fileSize?: number | null;
+  fileBase64?: string | null;
+}) => {
+  if (
+    typeof fileSize === "number" &&
+    Number.isFinite(fileSize) &&
+    fileSize > 0
+  ) {
+    return fileSize;
+  }
+
+  if (fileBase64) {
+    return getBase64ByteSize(fileBase64);
+  }
+
+  return null;
+};
+
+const ensureAvatarWithinSizeLimit = ({
+  fileSize,
+  fileBase64,
+}: {
+  fileSize?: number | null;
+  fileBase64?: string | null;
+}) => {
+  const resolvedSize = getResolvedAvatarSize({ fileSize, fileBase64 });
+
+  if (resolvedSize && resolvedSize > MAX_AVATAR_UPLOAD_BYTES) {
+    throw new Error(avatarSizeLimitMessage);
+  }
+};
 
 const IMAGE_CONTENT_TYPES: Record<string, string> = {
   gif: "image/gif",
@@ -143,14 +188,18 @@ export const uploadAvatarFile = async ({
   fileUri,
   fileName,
   fileBase64,
+  fileSize,
   contentType,
 }: {
   userId: string;
   fileUri: string;
   fileName?: string | null;
   fileBase64?: string | null;
+  fileSize?: number | null;
   contentType?: string | null;
 }) => {
+  ensureAvatarWithinSizeLimit({ fileSize, fileBase64 });
+
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
   if (sessionError) throw sessionError;
@@ -171,7 +220,9 @@ export const uploadAvatarFile = async ({
   if (__DEV__) {
     const uriScheme = fileUri.includes(":") ? fileUri.split(":")[0] : "unknown";
     console.log("[avatar-upload] Starting upload", {
+      fileSize,
       hasBase64: Boolean(fileBase64),
+      maxAvatarSizeMb: MAX_AVATAR_UPLOAD_MB,
       resolvedContentType,
       uriScheme,
     });
@@ -187,7 +238,10 @@ export const uploadAvatarFile = async ({
       });
     } catch (error) {
       if (__DEV__) {
-        console.warn("[avatar-upload] Base64 conversion failed, falling back to URI read", error);
+        console.warn(
+          "[avatar-upload] Base64 conversion failed, falling back to URI read",
+          error,
+        );
       }
     }
   }
