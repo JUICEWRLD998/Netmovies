@@ -144,7 +144,6 @@ export default function MovieDetailScreen() {
       if (bookmarked) {
         await removeMovieBookmark(user.id, movie.id);
         setBookmarked(false);
-        setBookmarkMessage("Removed from your bookmarks.");
       } else {
         await addMovieBookmark(user.id, {
           id: movie.id,
@@ -154,7 +153,6 @@ export default function MovieDetailScreen() {
           release_date: movie.release_date,
         });
         setBookmarked(true);
-        setBookmarkMessage("Added to your bookmarks.");
       }
     } catch (bookmarkError) {
       setBookmarkMessage(friendlyBookmarkError(bookmarkError));
@@ -223,9 +221,6 @@ export default function MovieDetailScreen() {
   const certification = getCertification(movie);
   const countries =
     movie.production_countries?.map((c) => c.name).join(" • ") || "N/A";
-  const isBookmarkSuccess =
-    (bookmarkMessage?.toLowerCase().includes("added") ?? false) ||
-    (bookmarkMessage?.toLowerCase().includes("removed") ?? false);
 
   return (
     <ScrollView
@@ -406,7 +401,7 @@ export default function MovieDetailScreen() {
               {!!bookmarkMessage && (
                 <Text
                   style={{
-                    color: isBookmarkSuccess ? "#86EFAC" : "#FCA5A5",
+                    color: "#FCA5A5",
                     fontSize: 12,
                     marginTop: 8,
                     lineHeight: 18,
