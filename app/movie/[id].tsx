@@ -361,36 +361,60 @@ export default function MovieDetailScreen() {
             </View>
 
             <View style={{ marginTop: 14 }}>
-              <TouchableOpacity
-                onPress={handleToggleBookmark}
-                disabled={bookmarkBusy || bookmarkLoading}
+              <View
                 style={{
-                  backgroundColor: bookmarked ? "#E50914" : "#1F2937",
-                  borderRadius: 12,
-                  paddingHorizontal: 14,
-                  paddingVertical: 10,
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
-                  opacity: bookmarkBusy || bookmarkLoading ? 0.7 : 1,
                 }}
               >
-                {bookmarkBusy || bookmarkLoading ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Ionicons
-                    name={bookmarked ? "bookmark" : "bookmark-outline"}
-                    size={16}
-                    color="#fff"
-                    style={{ marginRight: 8 }}
-                  />
-                )}
-                <Text
-                  style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+                <TouchableOpacity
+                  onPress={handleToggleBookmark}
+                  disabled={bookmarkBusy || bookmarkLoading}
+                  style={{
+                    flex: 1,
+                    backgroundColor: bookmarked ? "#E50914" : "#1F2937",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: bookmarkBusy || bookmarkLoading ? 0.7 : 1,
+                  }}
                 >
-                  {bookmarked ? "Remove Bookmark" : "Add to Bookmark"}
-                </Text>
-              </TouchableOpacity>
+                  {bookmarkBusy || bookmarkLoading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Ionicons
+                      name={bookmarked ? "bookmark" : "bookmark-outline"}
+                      size={16}
+                      color="#fff"
+                      style={{ marginRight: 8 }}
+                    />
+                  )}
+                  <Text
+                    style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}
+                  >
+                    {bookmarked ? "Remove Bookmark" : "Add to Bookmark"}
+                  </Text>
+                </TouchableOpacity>
+
+                <View
+                  style={{
+                    marginLeft: 10,
+                    width: 44,
+                    height: 44,
+                    backgroundColor: "#111827",
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: "#374151",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="download-outline" size={18} color="#E5E7EB" />
+                </View>
+              </View>
 
               {!user?.id && (
                 <Text style={{ color: "#9CA3AF", fontSize: 12, marginTop: 8 }}>
