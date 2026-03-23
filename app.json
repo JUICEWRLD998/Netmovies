@@ -4,7 +4,7 @@
     "slug": "Net_movies",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/netmovies-logo.png",
+    "icon": "./assets/images/brand-logo.png",
     "scheme": "netmovies",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -37,6 +37,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "55321b74-b875-463c-b47c-ff9dbeb1b768"
+      }
     }
   }
 }
