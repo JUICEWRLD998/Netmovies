@@ -6,9 +6,10 @@ import {
   type Href,
 } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, StatusBar, View } from "react-native";
+import { ActivityIndicator, StatusBar, Text, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import "../global.css";
+import { SUPABASE_ENV_ERROR } from "../services/supabase";
 
 /** Redirects users between (auth) and (tabs) based on session state. */
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,20 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  if (SUPABASE_ENV_ERROR) {
+    return (
+      <View className="flex-1 bg-[#0F1528] items-center justify-center px-6">
+        <StatusBar hidden={true} />
+        <Text className="text-white text-xl font-bold text-center mb-3">
+          App Configuration Error
+        </Text>
+        <Text className="text-gray-300 text-center leading-6">
+          {SUPABASE_ENV_ERROR}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
       <AuthGate>

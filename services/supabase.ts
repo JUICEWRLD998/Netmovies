@@ -6,29 +6,34 @@ import type { Bookmark, Movie } from "../types/movie";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Missing Supabase environment variables. " +
-      "Make sure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set in your .env file.",
-  );
-}
+export const SUPABASE_ENV_ERROR =
+  !supabaseUrl || !supabaseAnonKey
+    ? "Missing Supabase environment variables. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in EAS environment variables or your local .env file."
+    : null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth:
-    Platform.OS === "web"
-      ? {
-          // During static rendering, window/localStorage are unavailable.
-          autoRefreshToken: typeof window !== "undefined",
-          persistSession: typeof window !== "undefined",
-          detectSessionInUrl: true,
-        }
-      : {
-          storage: AsyncStorage,
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: false,
-        },
-});
+const resolvedSupabaseUrl = supabaseUrl || "https://placeholder.invalid";
+const resolvedSupabaseAnonKey = supabaseAnonKey || "placeholder-anon-key";
+
+export const supabase = createClient(
+  resolvedSupabaseUrl,
+  resolvedSupabaseAnonKey,
+  {
+    auth:
+      Platform.OS === "web"
+        ? {
+            // During static rendering, window/localStorage are unavailable.
+            autoRefreshToken: typeof window !== "undefined",
+            persistSession: typeof window !== "undefined",
+            detectSessionInUrl: true,
+          }
+        : {
+            storage: AsyncStorage,
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: false,
+          },
+  },
+);
 
 // Refresh the session whenever the app comes back to the foreground
 if (Platform.OS !== "web") {
