@@ -257,6 +257,15 @@ export default function ProfilePage() {
   );
 
   const handleSaveProfile = useCallback(async () => {
+    const hasUsernameChanged =
+      draftUsername.trim() !== (profile.username ?? "").trim();
+
+    if (!hasUsernameChanged) {
+      setErrorMsg("");
+      setEditing(false);
+      return;
+    }
+
     const trimmedUsername = validateUsername();
     if (!trimmedUsername) return;
 
@@ -271,7 +280,7 @@ export default function ProfilePage() {
     } finally {
       setSavingProfile(false);
     }
-  }, [saveProfileChanges, validateUsername]);
+  }, [draftUsername, profile.username, saveProfileChanges, validateUsername]);
 
   const handlePickAvatar = useCallback(async () => {
     if (!user?.id) {
@@ -370,10 +379,9 @@ export default function ProfilePage() {
     }
   }, [signOut]);
 
-  const canSave =
-    !savingProfile &&
-    draftUsername.trim() !== "" &&
+  const hasUsernameChanged =
     draftUsername.trim() !== (profile.username ?? "").trim();
+  const canSave = editing && !isBusy;
 
   return (
     <View className="flex-1 bg-[#0F1528]">
@@ -549,7 +557,8 @@ export default function ProfilePage() {
                           )}
                         </View>
                         <Text className="text-gray-500 text-sm mt-2 ml-1">
-                          Choose a square photo for the cleanest result.
+                          Choose a square photo for the cleanest result. Avatar
+                          updates are applied immediately.
                         </Text>
                       </View>
 
@@ -582,7 +591,7 @@ export default function ProfilePage() {
                             <ActivityIndicator color="#fff" />
                           ) : (
                             <Text className="text-white text-base font-bold tracking-wide">
-                              Save Changes
+                              {hasUsernameChanged ? "Save Changes" : "Done"}
                             </Text>
                           )}
                         </TouchableOpacity>
