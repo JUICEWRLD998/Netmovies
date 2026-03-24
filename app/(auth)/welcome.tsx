@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
             fontSize: 38,
             fontWeight: "900",
             color: "#E50914",
-            letterSpacing: 4,
+            letterSpacing: 2,
             marginTop: 20,
           }}
         >
@@ -45,7 +45,7 @@ export default function WelcomeScreen() {
       <View className="pb-14">
         <TouchableOpacity
           onPress={goToSignUp}
-          activeOpacity={0.85}
+          activeOpacity={0.65}
           className="bg-[#E50914] rounded-xl py-4 items-center mb-4"
         >
           <Text className="text-white text-base font-bold tracking-wider">
