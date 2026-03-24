@@ -2,16 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
@@ -60,27 +59,17 @@ export default function LoginScreen() {
   }, [email, password, signIn]);
 
   // ── Forgot Password ─────────────────────────────────────────────────────
-  const handleForgotPassword = useCallback(() => {
+  const handleForgotPassword = useCallback(async () => {
     const trimmed = email.trim();
     if (!trimmed || !EMAIL_RE.test(trimmed)) {
-      Alert.alert(
-        "Reset Password",
-        "Enter your email above, then tap Forgot Password again.",
-      );
+      setErrorMsg("Enter a valid email above, then tap Forgot Password again.");
       return;
     }
-    Alert.alert("Reset Password", `Send a password reset link to ${trimmed}?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Send",
-        onPress: async () => {
-          const { error } = await resetPassword(trimmed);
-          if (error) {
-            Alert.alert("Error", friendlyAuthError(error));
-          }
-        },
-      },
-    ]);
+    setErrorMsg("");
+    const { error } = await resetPassword(trimmed);
+    if (error) {
+      setErrorMsg(friendlyAuthError(error));
+    }
   }, [email, resetPassword]);
 
   const isDisabled = loading;
