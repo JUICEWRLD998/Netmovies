@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
@@ -123,7 +123,7 @@ export default function SignUpScreen() {
               Create Account
             </Text>
             <Text className="text-gray-400 text-base mt-1">
-              Join the movie community
+              Explore the world of movies. Sign up to get started!
             </Text>
           </View>
 
@@ -148,7 +148,7 @@ export default function SignUpScreen() {
               <View className="bg-[#1A1F3A] rounded-xl px-4 py-3.5 flex-row items-center">
                 <Ionicons name="mail-outline" size={20} color="#6B7280" />
                 <TextInput
-                  placeholder="you@example.com"
+                  placeholder="johndoe@gmail.com"
                   placeholderTextColor="#4B5563"
                   className="flex-1 text-white text-base ml-3"
                   value={email}

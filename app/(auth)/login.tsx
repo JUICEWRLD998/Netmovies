@@ -183,7 +183,7 @@ export default function LoginScreen() {
               className="self-end mb-6"
               disabled={isDisabled}
             >
-              <Text className="text-[#E50914] text-sm font-medium">
+              <Text className="text-[#ffffff] text-sm font-medium">
                 Forgot Password?
               </Text>
             </TouchableOpacity>
