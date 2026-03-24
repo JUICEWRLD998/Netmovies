@@ -2,16 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
@@ -86,16 +85,7 @@ export default function SignUpScreen() {
       if (error) {
         setErrorMsg(friendlyAuthError(error));
       } else {
-        Alert.alert(
-          "Check your email",
-          "We sent a confirmation link. Please verify your email to continue.",
-          [
-            {
-              text: "OK",
-              onPress: () => router.replace("/(auth)/login" as Href),
-            },
-          ],
-        );
+        router.replace("/(auth)/login" as Href);
       }
     } catch {
       setErrorMsg("Network error. Please check your connection.");

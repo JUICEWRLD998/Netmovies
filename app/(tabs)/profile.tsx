@@ -121,7 +121,6 @@ export default function ProfilePage() {
   const [signingOut, setSigningOut] = useState(false);
   const [editing, setEditing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
 
   const displayName = profile.username?.trim() || "User";
   const memberSince = formatMemberSince(user?.created_at);
@@ -191,14 +190,12 @@ export default function ProfilePage() {
 
   const handleStartEditing = useCallback(() => {
     setDraftUsername(profile.username ?? "");
-    setSuccessMsg("");
     setErrorMsg("");
     setEditing(true);
   }, [profile.username]);
 
   const handleCancelEditing = useCallback(() => {
     setDraftUsername(profile.username ?? "");
-    setSuccessMsg("");
     setErrorMsg("");
     setEditing(false);
   }, [profile.username]);
@@ -265,12 +262,10 @@ export default function ProfilePage() {
 
     setSavingProfile(true);
     setErrorMsg("");
-    setSuccessMsg("");
 
     try {
       await saveProfileChanges({ username: trimmedUsername });
       setEditing(false);
-      setSuccessMsg("Profile updated successfully.");
     } catch (error) {
       setErrorMsg(friendlyProfileError(error));
     } finally {
@@ -286,7 +281,6 @@ export default function ProfilePage() {
 
     setUpdatingAvatar(true);
     setErrorMsg("");
-    setSuccessMsg("");
 
     try {
       const permission =
@@ -336,7 +330,6 @@ export default function ProfilePage() {
       });
 
       await saveProfileChanges({ avatar_url: avatarUrl });
-      setSuccessMsg("Avatar updated successfully.");
     } catch (error) {
       setErrorMsg(friendlyProfileError(error));
     } finally {
@@ -352,12 +345,10 @@ export default function ProfilePage() {
 
     setUpdatingAvatar(true);
     setErrorMsg("");
-    setSuccessMsg("");
 
     try {
       await removeAvatarFile(user.id);
       await saveProfileChanges({ avatar_url: null });
-      setSuccessMsg("Avatar removed.");
     } catch (error) {
       setErrorMsg(friendlyProfileError(error));
     } finally {
@@ -368,7 +359,6 @@ export default function ProfilePage() {
   const handleSignOut = useCallback(async () => {
     setSigningOut(true);
     setErrorMsg("");
-    setSuccessMsg("");
 
     try {
       const { error } = await signOut();
@@ -414,20 +404,6 @@ export default function ProfilePage() {
                   style={{ marginRight: 8 }}
                 />
                 <Text className="text-red-300 text-sm flex-1">{errorMsg}</Text>
-              </View>
-            )}
-
-            {successMsg !== "" && (
-              <View className="bg-emerald-900/30 border border-emerald-700 rounded-xl px-4 py-3 mb-4 flex-row items-center">
-                <Ionicons
-                  name="checkmark-circle"
-                  size={18}
-                  color="#6EE7B7"
-                  style={{ marginRight: 8 }}
-                />
-                <Text className="text-emerald-200 text-sm flex-1">
-                  {successMsg}
-                </Text>
               </View>
             )}
           </View>
@@ -518,7 +494,6 @@ export default function ProfilePage() {
                             onChangeText={(value) => {
                               setDraftUsername(value);
                               setErrorMsg("");
-                              setSuccessMsg("");
                             }}
                             autoCapitalize="none"
                             autoCorrect={false}

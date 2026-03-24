@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { friendlyAuthError, useAuth } from "../../context/AuthContext";
 
@@ -77,8 +77,6 @@ export default function LoginScreen() {
           const { error } = await resetPassword(trimmed);
           if (error) {
             Alert.alert("Error", friendlyAuthError(error));
-          } else {
-            Alert.alert("Check your email", "A reset link has been sent.");
           }
         },
       },
