@@ -295,6 +295,11 @@ const readArrayBufferFromUri = async (fileUri: string) => {
 export const getAvatarPublicUrl = (filePath: string) =>
   supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath).data.publicUrl;
 
+const withCacheBuster = (url: string) => {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${Date.now()}`;
+};
+
 export const uploadAvatarFile = async ({
   userId,
   fileUri,
@@ -391,7 +396,7 @@ export const uploadAvatarFile = async ({
     throw error;
   }
 
-  return getAvatarPublicUrl(filePath);
+  return withCacheBuster(getAvatarPublicUrl(filePath));
 };
 
 export const removeAvatarFile = async (userId: string) => {
