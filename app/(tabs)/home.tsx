@@ -194,7 +194,11 @@ export default function HomePage() {
                     {trendingMovies.map((item) => {
                       const poster = TMDB.getImageUrl(item.poster_path, "w342");
                       return (
-                        <TouchableOpacity key={item.id} activeOpacity={0.85}>
+                        <TouchableOpacity
+                          key={item.id}
+                          activeOpacity={0.85}
+                          onPress={() => router.push(`/movie/${item.id}` as any)}
+                        >
                           <View className="w-36 rounded-xl overflow-hidden bg-[#1A1F3A]">
                             {poster ? (
                               <Image

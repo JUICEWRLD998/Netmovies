@@ -124,7 +124,7 @@ export default function LoginScreen() {
               <View className="bg-[#1A1F3A] rounded-xl px-4 py-3.5 flex-row items-center">
                 <Ionicons name="mail-outline" size={20} color="#6B7280" />
                 <TextInput
-                  placeholder="you@example.com"
+                  placeholder="johndoe@gmail.com"
                   placeholderTextColor="#4B5563"
                   className="flex-1 text-white text-base ml-3"
                   value={email}
