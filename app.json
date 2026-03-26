@@ -4,7 +4,7 @@
     "slug": "Net_movies",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/brand-logo.png",
+    "icon": "./assets/images/netmovies-logo.png",
     "scheme": "netmovies",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,7 +13,11 @@
     "android": {
       "package": "com.Netmovies",
       "googleServicesFile": "./google-services.json",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/netmovies-logo.png",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "output": "static"

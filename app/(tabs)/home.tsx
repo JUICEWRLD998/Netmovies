@@ -197,7 +197,9 @@ export default function HomePage() {
                         <TouchableOpacity
                           key={item.id}
                           activeOpacity={0.85}
-                          onPress={() => router.push(`/movie/${item.id}` as any)}
+                          onPress={() =>
+                            router.push(`/movie/${item.id}` as any)
+                          }
                         >
                           <View className="w-36 rounded-xl overflow-hidden bg-[#1A1F3A]">
                             {poster ? (
