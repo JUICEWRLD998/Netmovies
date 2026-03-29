@@ -5,11 +5,20 @@ import {
   useSegments,
   type Href,
 } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { ActivityIndicator, StatusBar, Text, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import "../global.css";
 import { SUPABASE_ENV_ERROR } from "../services/supabase";
+
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Ignore if splash is already prevented/hidden.
+});
+SplashScreen.setOptions({
+  duration: 300,
+  fade: true,
+});
 
 /** Redirects users between (auth) and (tabs) based on session state. */
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -21,6 +30,10 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Wait until the router is mounted and auth state is resolved
     if (!navigationState?.key || loading) return;
+
+    SplashScreen.hideAsync().catch(() => {
+      // Ignore hide race conditions.
+    });
 
     const inAuthGroup = (segments[0] as string) === "(auth)";
 
@@ -43,6 +56,14 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    if (!SUPABASE_ENV_ERROR) return;
+
+    SplashScreen.hideAsync().catch(() => {
+      // Ensure splash does not block configuration error screen.
+    });
+  }, []);
+
   if (SUPABASE_ENV_ERROR) {
     return (
       <View className="flex-1 bg-[#0F1528] items-center justify-center px-6">

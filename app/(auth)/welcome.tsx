@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
       {/* Center content */}
       <View className="flex-1 items-center justify-center">
         <Image
-          source={require("../../assets/images/brand-logo.png")}
+          source={require("../../assets/images/netmovies-logo.png")}
           style={{ width: 110, height: 110 }}
           resizeMode="contain"
         />
